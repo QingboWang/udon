@@ -88,7 +88,7 @@ If gene names are omitted from `lof_betas`, the values are matched to
 |---|---|
 | `gene` | Gene symbol |
 | `score` | Signed UDON score from the causal network. Positive = activity propagates toward the candidate set; negative = anti-correlated propagation. |
-| `abs_score` | `|score|` from the causal network — primary ranking key |
+| `abs_score` | `abs(score)` from the causal network — primary ranking key |
 | `rank` | Rank 1 = strongest predicted influence. Primary: `abs_score` descending; tie-breaker: dense network score descending (for genes with causal score = 0). |
 | `is_core` | `TRUE` if the gene is in the input list |
 
