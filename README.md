@@ -76,9 +76,9 @@ head(results, 10)
 | Column | Description |
 |---|---|
 | `gene` | Gene symbol |
-| `score` | Signed UDON score. Positive = activity propagates toward the candidate set; negative = anti-correlated propagation. |
-| `abs_score` | `|score|` — used for ranking |
-| `rank` | Rank by `abs_score` descending; rank 1 = strongest predicted influence |
+| `score` | Signed UDON score from the causal network. Positive = activity propagates toward the candidate set; negative = anti-correlated propagation. |
+| `abs_score` | `|score|` from the causal network — primary ranking key |
+| `rank` | Rank 1 = strongest predicted influence. Primary: `abs_score` descending; tie-breaker: dense network score descending (for genes with causal score = 0). |
 | `is_core` | `TRUE` if the gene is in the input list |
 
 ## Other functions
@@ -99,10 +99,15 @@ set to 1 so direct effects always count), and the weight is:
 
 $$w(c) = \begin{cases} -\beta_\text{LoF}[c] & \text{if a LoF beta is provided} \\ 1 & \text{otherwise (UDON\_approx)} \end{cases}$$
 
-The matrix $M$ is built from two complementary gene-regulation networks:
+The score $T[i,c]$ is computed from two gene-regulation networks:
 
-- **Causal network** — sparse MVMR + rare-variant LoF edges (2,644 genes)
-- **Dense network** — genome-wide raw protein-QTL betas (2,896 genes)
+- **Causal network** — sparse MVMR + rare-variant LoF edges (2,644 genes).
+  This is the primary network; it determines the score and rank for any
+  gene reachable from the candidates.
+- **Dense network** — genome-wide raw protein-QTL betas (2,896 genes).
+  Used only as a tie-breaker: genes that receive zero score from the causal
+  network (not connected to the candidates) are ordered by their dense-network
+  score.
 
 Both networks are spectrally damped (largest eigenvalue capped at 0.95)
 before inversion to ensure stable propagation.

@@ -18,10 +18,11 @@
 #' @return A data.frame with one row per network gene, sorted by rank:
 #'   \describe{
 #'     \item{gene}{Gene symbol.}
-#'     \item{score}{Signed UDON score. Positive = activity correlates with
-#'       core gene set in the network's propagation direction.}
-#'     \item{abs_score}{Absolute score used for ranking.}
-#'     \item{rank}{Rank by abs_score descending; rank 1 = strongest influence.}
+#'     \item{score}{Signed UDON score from the causal network. Positive =
+#'       activity propagates toward the core gene set.}
+#'     \item{abs_score}{|score| from the causal network; primary ranking key.}
+#'     \item{rank}{Rank 1 = strongest influence. Primary key: abs_score
+#'       descending; tie-breaker: dense network abs score descending.}
 #'     \item{is_core}{Logical; TRUE if the gene is in \code{core_genes}.}
 #'   }
 #'
@@ -86,17 +87,21 @@ udon_score <- function(core_genes, lof_betas = NULL) {
   s1 <- as.numeric(T1 %*% w1)
   s2 <- as.numeric(T2 %*% w2)
 
-  # Merge: sum contributions from both networks
+  # Merge networks; rank lexicographically: |s1| primary, |s2| tie-breaker.
+  # The causal network (T1) drives the rank; the dense network (T2) only
+  # orders genes the causal network cannot distinguish (those with s1 == 0),
+  # matching the original UDON definition.
   df1 <- data.frame(gene = genes1, s1 = s1, stringsAsFactors = FALSE)
   df2 <- data.frame(gene = genes2, s2 = s2, stringsAsFactors = FALSE)
   df  <- merge(df1, df2, by = "gene", all = TRUE)
   df[is.na(df$s1), "s1"] <- 0.0
   df[is.na(df$s2), "s2"] <- 0.0
-  df$score    <- df$s1 + df$s2
-  df$abs_score <- abs(df$score)
-  df$rank     <- rank(-df$abs_score, ties.method = "min")
-  df$is_core  <- df$gene %in% cands
-  df <- df[order(df$rank), c("gene","score","abs_score","rank","is_core")]
+  df$score     <- df$s1
+  df$abs_score <- abs(df$s1)
+  df$is_core   <- df$gene %in% cands
+  df <- df[order(-df$abs_score, -abs(df$s2)), ]
+  df$rank <- seq_len(nrow(df))
+  df <- df[, c("gene","score","abs_score","rank","is_core")]
   rownames(df) <- NULL
   df
 }
