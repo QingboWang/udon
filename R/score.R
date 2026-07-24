@@ -7,12 +7,13 @@
 #' @param core_genes Character vector of gene symbols associated with the trait
 #'   (e.g. GWAS hits, eQTL targets). Genes absent from the network are ignored
 #'   and reported in a message.
-#' @param lof_betas Named numeric vector of LoF effect sizes, keyed by gene
-#'   symbol (e.g. `c(PCSK9 = -0.985, LDLR = 0.284)`). The weight applied to
-#'   core gene `c` is `-lof_betas[c]`, matching the UDON formula
-#'   `w(c) = -beta_LoF[c]`. Core genes missing from this vector fall back to
-#'   unit weight (1.0). If `NULL` (default), all core genes receive unit weight
-#'   (UDON_approx mode).
+#' @param lof_betas Numeric vector of LoF effect sizes. Can be named
+#'   (e.g. `c(PCSK9 = -0.985, LDLR = 0.284)`) or unnamed — if unnamed, must
+#'   be the same length as `core_genes` and is assumed to be in the same order.
+#'   The weight applied to core gene `c` is `-lof_betas[c]`, matching the UDON
+#'   formula `w(c) = -beta_LoF[c]`. Named core genes missing from this vector
+#'   fall back to unit weight (1.0). If `NULL` (default), all core genes
+#'   receive unit weight (UDON_approx mode).
 #'
 #' @return A data.frame with one row per network gene, sorted by rank:
 #'   \describe{
@@ -40,7 +41,12 @@
 udon_score <- function(core_genes, lof_betas = NULL) {
   stopifnot(is.character(core_genes), length(core_genes) > 0)
   if (!is.null(lof_betas)) {
-    stopifnot(is.numeric(lof_betas), !is.null(names(lof_betas)))
+    stopifnot(is.numeric(lof_betas))
+    if (is.null(names(lof_betas))) {
+      if (length(lof_betas) != length(core_genes))
+        stop("Unnamed lof_betas must have the same length as core_genes.")
+      names(lof_betas) <- core_genes
+    }
   }
 
   .load_network()
