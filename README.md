@@ -71,6 +71,17 @@ head(results, 10)
 #> ...
 ```
 
+If gene names are omitted from `lof_betas`, the values are matched to
+  `core_genes` positionally (same order, same length):
+
+  ```r
+  results <- udon_score(
+    core_genes = c("PCSK9", "LDLR", "ANGPTL3", "APOB", "SLC4A1", "ASGR1"),
+    lof_betas  = c(-0.985, 0.284, -0.314, -1.765, -1.026, -0.278)
+  )
+  ```
+
+
 ## Output columns
 
 | Column | Description |
