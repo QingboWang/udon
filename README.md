@@ -1,9 +1,9 @@
 # udon
 
-**U**niversal **D**ownstream **O**verall **N**etwork scoring — an R package for
+**U**pstream **D**istance in the **O**mnigenic **N**etwork scoring — an R package for
 ranking proteins by their predicted influence on a trait of interest.
 
-Given a list of genes associated with a trait (e.g. GWAS hits, rare-variant
+Given a list of "core" genes presumably associated with a trait (e.g. GWAS hits, rare-variant
 associations), `udon` scores all ~2,900 proteins in a precomputed
 gene-regulation network by how strongly their activity propagates to those
 genes. The result is a ranked table that prioritises proteins upstream of
@@ -21,7 +21,7 @@ download is required.
 
 ## Quick start
 
-### Without effect sizes (UDON_approx)
+### Without core genes' effect sizes to the trait (UDON_approx)
 
 Provide gene names only — each is assigned equal weight:
 
