@@ -13,7 +13,7 @@ known trait-relevant biology.
 
 ```r
 # install.packages("remotes")
-remotes::install_github("YOUR_ORG/udon")
+remotes::install_github("calico/udon")
 ```
 
 The package ships precomputed network matrices (~62 MB); no external data
