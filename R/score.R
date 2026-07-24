@@ -1,44 +1,44 @@
-#' Score genes by network propagation to a candidate set
+#' Score genes by network propagation to a set of core genes
 #'
-#' Given a set of genes associated with a trait, scores all proteins in the
-#' network by how strongly their activity propagates to those candidates.
+#' Given a set of core genes associated with a trait, scores all proteins in
+#' the network by how strongly their activity propagates to those core genes.
 #' Ranks by absolute score (rank 1 = strongest influence).
 #'
-#' @param candidates Character vector of gene symbols associated with the trait
+#' @param core_genes Character vector of gene symbols associated with the trait
 #'   (e.g. GWAS hits, eQTL targets). Genes absent from the network are ignored
-#'   with a warning.
+#'   and reported in a message.
 #' @param lof_betas Named numeric vector of LoF effect sizes, keyed by gene
 #'   symbol (e.g. `c(PCSK9 = -0.985, LDLR = 0.284)`). The weight applied to
-#'   candidate `c` is `-lof_betas[c]`, matching the UDON formula
-#'   `w(c) = -beta_LoF[c]`. Candidates missing from this vector fall back to
-#'   unit weight (1.0). If `NULL` (default), all candidates receive unit weight
+#'   core gene `c` is `-lof_betas[c]`, matching the UDON formula
+#'   `w(c) = -beta_LoF[c]`. Core genes missing from this vector fall back to
+#'   unit weight (1.0). If `NULL` (default), all core genes receive unit weight
 #'   (UDON_approx mode).
 #'
 #' @return A data.frame with one row per network gene, sorted by rank:
 #'   \describe{
 #'     \item{gene}{Gene symbol.}
 #'     \item{score}{Signed UDON score. Positive = activity correlates with
-#'       candidate set in the network's propagation direction.}
+#'       core gene set in the network's propagation direction.}
 #'     \item{abs_score}{Absolute score used for ranking.}
 #'     \item{rank}{Rank by abs_score descending; rank 1 = strongest influence.}
-#'     \item{is_candidate}{Logical; TRUE if the gene is in \code{candidates}.}
+#'     \item{is_core}{Logical; TRUE if the gene is in \code{core_genes}.}
 #'   }
 #'
 #' @examples
 #' # UDON_approx: unit weights
-#' res <- score(c("PCSK9", "LDLR", "ANGPTL3"))
+#' res <- udon_score(core_genes = c("PCSK9", "LDLR", "ANGPTL3"))
 #' head(res, 10)
 #'
 #' # UDON: provide LoF betas where available; missing ones fall back to 1.0
-#' res <- score(
-#'   c("PCSK9", "LDLR", "ANGPTL3"),
-#'   lof_betas = c(PCSK9 = -0.985, LDLR = 0.284, ANGPTL3 = -0.314)
+#' res <- udon_score(
+#'   core_genes = c("PCSK9", "LDLR", "ANGPTL3"),
+#'   lof_betas  = c(PCSK9 = -0.985, LDLR = 0.284, ANGPTL3 = -0.314)
 #' )
 #' head(res, 10)
 #'
 #' @export
-score <- function(candidates, lof_betas = NULL) {
-  stopifnot(is.character(candidates), length(candidates) > 0)
+udon_score <- function(core_genes, lof_betas = NULL) {
+  stopifnot(is.character(core_genes), length(core_genes) > 0)
   if (!is.null(lof_betas)) {
     stopifnot(is.numeric(lof_betas), !is.null(names(lof_betas)))
   }
@@ -50,15 +50,20 @@ score <- function(candidates, lof_betas = NULL) {
   genes1 <- .udon_env$genes1
   genes2 <- .udon_env$genes2
 
-  cands <- unique(candidates)
+  cands   <- unique(core_genes)
+  all_net <- union(genes1, genes2)
+  missing <- setdiff(cands, all_net)
+  included <- intersect(cands, all_net)
 
-  # Warn about candidates absent from both networks
-  missing <- setdiff(cands, union(genes1, genes2))
+  message(sprintf(
+    "%d out of %d core gene candidates are included.",
+    length(included), length(cands)
+  ))
   if (length(missing) > 0) {
-    warning(sprintf(
-      "%d candidate(s) not found in either network and will not contribute ",
-      "to scores: %s", length(missing), paste(sort(missing), collapse = ", ")
-    ), call. = FALSE)
+    message(sprintf(
+      "Genes %s are excluded as they are not part of the protein-regulation network.",
+      paste(sort(missing), collapse = ", ")
+    ))
   }
 
   # Weight function: -lof_betas[g] if provided, else 1.0
@@ -81,11 +86,11 @@ score <- function(candidates, lof_betas = NULL) {
   df  <- merge(df1, df2, by = "gene", all = TRUE)
   df[is.na(df$s1), "s1"] <- 0.0
   df[is.na(df$s2), "s2"] <- 0.0
-  df$score     <- df$s1 + df$s2
+  df$score    <- df$s1 + df$s2
   df$abs_score <- abs(df$score)
-  df$rank      <- rank(-df$abs_score, ties.method = "min")
-  df$is_candidate <- df$gene %in% cands
-  df <- df[order(df$rank), c("gene","score","abs_score","rank","is_candidate")]
+  df$rank     <- rank(-df$abs_score, ties.method = "min")
+  df$is_core  <- df$gene %in% cands
+  df <- df[order(df$rank), c("gene","score","abs_score","rank","is_core")]
   rownames(df) <- NULL
   df
 }

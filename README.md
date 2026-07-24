@@ -28,9 +28,9 @@ Provide gene names only — each is assigned equal weight:
 ```r
 library(udon)
 
-results <- score(c("PCSK9", "LDLR", "ANGPTL3", "APOB", "SLC4A1", "ASGR1"))
+results <- udon_score(c("PCSK9", "LDLR", "ANGPTL3", "APOB", "SLC4A1", "ASGR1"))
 head(results, 10)
-#>        gene     score abs_score rank is_candidate
+#>        gene     score abs_score rank is_core
 #> 1  SERPINA1 -3.235713  3.235713    1        FALSE
 #> 2   ANGPTL3  2.608621  2.608621    2         TRUE
 #> 3     ASGR1  2.141887  2.141887    3         TRUE
@@ -50,8 +50,8 @@ Genes in `candidates` that are missing from `lof_betas` fall back to unit
 weight automatically, so a partial beta vector is fine:
 
 ```r
-results <- score(
-  candidates = c("PCSK9", "LDLR", "ANGPTL3", "APOB", "SLC4A1", "ASGR1"),
+results <- udon_score(
+  core_genes = c("PCSK9", "LDLR", "ANGPTL3", "APOB", "SLC4A1", "ASGR1"),
   lof_betas  = c(PCSK9   = -0.985,
                  LDLR    =  0.284,
                  ANGPTL3 = -0.314,
@@ -60,7 +60,7 @@ results <- score(
                  ASGR1   = -0.278)
 )
 head(results, 10)
-#>        gene     score abs_score rank is_candidate
+#>        gene     score abs_score rank is_core
 #> 1    SLC4A1  2.052516  2.052516    1         TRUE
 #> 2     PCSK9  1.970492  1.970492    2         TRUE
 #> 3      APOB  1.776362  1.776362    3         TRUE
@@ -79,7 +79,7 @@ head(results, 10)
 | `score` | Signed UDON score. Positive = activity propagates toward the candidate set; negative = anti-correlated propagation. |
 | `abs_score` | `|score|` — used for ranking |
 | `rank` | Rank by `abs_score` descending; rank 1 = strongest predicted influence |
-| `is_candidate` | `TRUE` if the gene is in the input list |
+| `is_core` | `TRUE` if the gene is in the input list |
 
 ## Other functions
 
@@ -114,7 +114,7 @@ before inversion to ensure stable propagation.
 - The sign of `score` reflects the net direction of propagation. When
   candidate genes have mixed effect directions (e.g. some LoF betas positive,
   some negative), ranking by `abs_score` is appropriate.
-- The network matrices are loaded once per R session on the first `score()`
+- The network matrices are loaded once per R session on the first `udon_score()`
   call (~5–10 seconds). Subsequent calls with different gene lists are fast.
 
 ## Citation
