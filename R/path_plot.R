@@ -65,8 +65,8 @@ udon_path_plot <- function(source_gene,
   t1_df  <- t1_df[t1_df$from != t1_df$to, ]
   # Keep edge with largest |beta| per (from, to) pair
   t1_df  <- t1_df[order(-abs(t1_df$beta)), ]
-  t1_df  <- t1_df[!duplicated(paste(t1_df$from, t1_df$to, sep = "\x00")), ]
-  t1_key <- paste(t1_df$from, t1_df$to, sep = "\x00")
+  t1_df  <- t1_df[!duplicated(paste(t1_df$from, t1_df$to, sep = "\t")), ]
+  t1_key <- paste(t1_df$from, t1_df$to, sep = "\t")
   t1_beta_lup  <- setNames(t1_df$beta,  t1_key)
   t1_layer_lup <- setNames(t1_df$layer, t1_key)
 
@@ -110,7 +110,7 @@ udon_path_plot <- function(source_gene,
     for (p in paths[lens == min_len]) {
       nms <- igraph::V(g1)[p]$name
       for (i in seq_len(length(nms) - 1L)) {
-        key <- paste(nms[i], nms[i + 1L], sep = "\x00")
+        key <- paste(nms[i], nms[i + 1L], sep = "\t")
         collected[[length(collected) + 1L]] <- data.frame(
           from   = nms[i],
           to     = nms[i + 1L],
@@ -137,8 +137,8 @@ udon_path_plot <- function(source_gene,
     )
     t2_df  <- t2_df[t2_df$from != t2_df$to, ]
     t2_df  <- t2_df[order(-abs(t2_df$beta)), ]
-    t2_df  <- t2_df[!duplicated(paste(t2_df$from, t2_df$to, sep = "\x00")), ]
-    t2_key <- paste(t2_df$from, t2_df$to, sep = "\x00")
+    t2_df  <- t2_df[!duplicated(paste(t2_df$from, t2_df$to, sep = "\t")), ]
+    t2_key <- paste(t2_df$from, t2_df$to, sep = "\t")
     t2_beta_lup <- setNames(t2_df$beta, t2_key)
     g2 <- igraph::graph_from_data_frame(t2_df, directed = TRUE)
 
@@ -156,7 +156,7 @@ udon_path_plot <- function(source_gene,
       }
       nms <- igraph::V(g2)[p]$name
       for (i in seq_len(length(nms) - 1L)) {
-        key <- paste(nms[i], nms[i + 1L], sep = "\x00")
+        key <- paste(nms[i], nms[i + 1L], sep = "\t")
         collected[[length(collected) + 1L]] <- data.frame(
           from   = nms[i],
           to     = nms[i + 1L],
