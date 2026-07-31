@@ -2,3 +2,4 @@
 
 export(udon_score)
 export(network_genes)
+export(udon_path_plot)
