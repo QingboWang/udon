@@ -43,7 +43,7 @@ udon_path_plot <- function(source_gene,
                            show_t2_fallback = TRUE,
                            output_file      = NULL) {
 
-  for (pkg in c("ggplot2", "arrow")) {
+  for (pkg in c("ggplot2", "nanoparquet")) {
     if (!requireNamespace(pkg, quietly = TRUE))
       stop(sprintf(
         "Package '%s' required. Install with: install.packages('%s')", pkg, pkg
@@ -122,7 +122,7 @@ udon_path_plot <- function(source_gene,
   }
 
   # ── Load and deduplicate T1 edges ─────────────────────────────────────────
-  t1_raw <- arrow::read_parquet(file.path(data_dir, "combined_edges_v5.parquet"))
+  t1_raw <- nanoparquet::read_parquet(file.path(data_dir, "combined_edges_v5.parquet"))
   t1_df  <- data.frame(
     from  = as.character(t1_raw$source),
     to    = as.character(t1_raw$target),
@@ -186,7 +186,7 @@ udon_path_plot <- function(source_gene,
 
   # ── T2 fallback paths ──────────────────────────────────────────────────────
   if (show_t2_fallback && length(t2_needed) > 0L) {
-    t2_raw <- arrow::read_parquet(
+    t2_raw <- nanoparquet::read_parquet(
       file.path(data_dir, "step1_betamat_raw_v5.parquet")
     )
     t2_df <- data.frame(
