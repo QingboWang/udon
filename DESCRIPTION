@@ -1,6 +1,6 @@
 Package: udon
 Title: Gene Scoring via Network Propagation (UDON)
-Version: 0.1.2
+Version: 0.1.3
 Authors@R: person("Qin", "Weng", email = "qsw@calicolabs.com", role = c("aut", "cre"))
 Description: Given a list of genes associated with a trait, scores all ~2,900
     proteins in a precomputed gene-regulation network by how strongly their

@@ -99,6 +99,39 @@ If gene names are omitted from `lof_betas`, the values are matched to
 network_genes()
 ```
 
+### Visualise upstream paths with `udon_path_plot()`
+
+Plot all shortest T1 causal paths from a single source gene to a set of core
+genes. A decorative "Phenotype" node is drawn to the right of the core genes.
+When no T1 path exists within `max_hops`, the shortest T2 (dense network) path
+is shown as dashed lines.
+
+```r
+# Basic usage — bundled data loaded automatically
+udon_path_plot(
+  source_gene = "CELSR2",
+  core_genes  = c("PCSK9", "LDLR", "ASGR1"),
+  output_file = "celsr2_paths.pdf"
+)
+
+# With effect sizes: style core→phenotype arrows by direction and magnitude
+udon_path_plot(
+  source_gene = "CELSR2",
+  core_genes  = c("PCSK9", "LDLR", "ASGR1"),
+  core_betas  = c(PCSK9 = -0.985, LDLR = 0.284, ASGR1 = -0.278),
+  output_file = "celsr2_paths.pdf"
+)
+```
+
+`core_betas` can also be an unnamed vector in the same order as `core_genes`:
+
+```r
+core_betas = c(-0.985, 0.284, -0.278)
+```
+
+Blue closed arrowheads = positive effect; orange T-bars = inhibition;
+line width scales with `|beta|`.
+
 ## Method
 
 UDON scores gene *i* as:

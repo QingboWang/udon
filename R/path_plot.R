@@ -19,7 +19,8 @@
 #' @param core_genes      Character vector. Target core gene symbols.
 #' @param data_dir        Path to the directory containing
 #'   \file{combined_edges_v5.parquet} (T1) and
-#'   \file{step1_betamat_raw_v5.parquet} (T2).
+#'   \file{step1_betamat_v5_p05.parquet} (T2, pre-filtered to p < 0.05).
+#'   Defaults to the package's built-in \file{extdata/} directory.
 #' @param max_hops        Maximum path length to consider (default \code{5}).
 #' @param show_t2_fallback Logical. When \code{TRUE} (default), draw the
 #'   shortest T2 path (dashed) for any core gene unreachable via T1 within
@@ -41,10 +42,18 @@
 #'
 #' @examples
 #' \dontrun{
+#' # Uses bundled data by default
 #' udon_path_plot(
 #'   source_gene = "CELSR2",
 #'   core_genes  = c("PCSK9", "LDLR", "ASGR1"),
-#'   data_dir    = "/path/to/GxG_v5/data",
+#'   output_file = "celsr2_paths.pdf"
+#' )
+#'
+#' # Or point to a custom data directory
+#' udon_path_plot(
+#'   source_gene = "CELSR2",
+#'   core_genes  = c("PCSK9", "LDLR", "ASGR1"),
+#'   data_dir    = "/path/to/data",
 #'   output_file = "celsr2_paths.pdf"
 #' )
 #' }
@@ -52,7 +61,7 @@
 #' @export
 udon_path_plot <- function(source_gene,
                            core_genes,
-                           data_dir,
+                           data_dir          = NULL,
                            max_hops          = 5L,
                            show_t2_fallback  = TRUE,
                            core_betas        = NULL,
@@ -66,6 +75,12 @@ udon_path_plot <- function(source_gene,
       ))
   }
 
+  if (is.null(data_dir)) {
+    data_dir <- system.file("extdata", package = "udon")
+    if (data_dir == "")
+      stop("data_dir not specified and package 'udon' is not installed. ",
+           "Provide data_dir explicitly.")
+  }
   data_dir    <- as.character(data_dir)
   max_hops    <- as.integer(max_hops)
   source_gene <- as.character(source_gene)
@@ -214,7 +229,7 @@ udon_path_plot <- function(source_gene,
   # ── T2 fallback paths ──────────────────────────────────────────────────────
   if (show_t2_fallback && length(t2_needed) > 0L) {
     t2_raw <- nanoparquet::read_parquet(
-      file.path(data_dir, "step1_betamat_raw_v5.parquet")
+      file.path(data_dir, "step1_betamat_v5_p05.parquet")
     )
     t2_df <- data.frame(
       from  = as.character(t2_raw$source),
