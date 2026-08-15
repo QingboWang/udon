@@ -141,7 +141,9 @@ $$\text{UDON}(i) = \sum_{c \in \text{candidates}} T[i, c] \cdot w(c)$$
 where $T = M(I - M)^{-1}$ is the network propagation matrix (with diagonal
 set to 1 so direct effects always count), and the weight is:
 
-$$w(c) =  -\beta_\text{LoF}[c] & \text{if a LoF beta is provided} \\ 1,  otherwise (unit weight) $$
+$$w(c) =  -\beta_\text{LoF}[c]$$
+
+(and is 1 when the LoF beta is not provided)
 
 The score $T[i,c]$ is computed from two gene-regulation networks:
 
